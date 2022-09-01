@@ -15,4 +15,6 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositor
 COPY ./sockd.conf /etc/
 COPY ./entrypoint.sh /entrypoint.sh
 
+HEALTHCHECK CMD ping 10.1.1.1 -c 3 -W 3 > /dev/null || exit 1
+
 ENTRYPOINT "/entrypoint.sh"

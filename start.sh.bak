@@ -1,0 +1,6 @@
+#!/bin/sh
+#    --restart unless-stopped \
+exec sudo docker run --rm -it --privileged --name=wireguard \
+    --cap-add=NET_ADMIN \
+    --volume "$(realpath "$1"):/etc/wireguard/:ro" \
+    --publish 127.0.0.1:1080:1080 juouyang/wireguard-socks-proxy:1.0.0
