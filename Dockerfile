@@ -17,4 +17,6 @@ COPY ./entrypoint.sh /entrypoint.sh
 
 HEALTHCHECK CMD ping 10.1.1.1 -c 3 -W 3 > /dev/null || exit 1
 
+STOPSIGNAL SIGTERM
+
 ENTRYPOINT "/entrypoint.sh"
