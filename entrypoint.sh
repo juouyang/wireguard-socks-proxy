@@ -23,7 +23,7 @@ function snooze {
 }
 
 ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
-wg-quick up /etc/wireguard/$ifname.conf
+wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
 sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
 
 snooze 3 &
