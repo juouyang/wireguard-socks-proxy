@@ -22,11 +22,23 @@ function snooze {
     sleep $1
 }
 
-ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
-wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
-sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
-
-snooze 3 &
-wait $!
-/usr/sbin/sockd &
-wait $!
+while true
+do
+  if ping -c 1 10.1.1.1 >/dev/null 2>&1; then
+    snooze 60 &
+    wait $!
+  else
+    if ping -c 1 1.1.1.1 >/dev/null 2>&1; then
+      ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
+      wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
+      sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
+      snooze 3 &
+      wait $!
+      /usr/sbin/sockd &
+      wait $!
+    else
+      snooze 60 &
+      wait $!
+    fi
+  fi
+done
