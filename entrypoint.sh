@@ -24,21 +24,16 @@ function snooze {
 
 while true
 do
-  if ping -c 1 10.1.1.1 >/dev/null 2>&1; then
-    snooze 60 &
+  if ! ping -c 1 10.1.1.1 >/dev/null 2>&1 && ping -c 1 1.1.1.1 >/dev/null 2>&1; then
+    echo "Ping 10.1.1.1 failed, but ping 1.1.1.1 succeeded!"
+    ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
+    wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
+    sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
+    snooze 3 &
     wait $!
-  else
-    if ping -c 1 1.1.1.1 >/dev/null 2>&1; then
-      ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
-      wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
-      sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
-      snooze 3 &
-      wait $!
-      /usr/sbin/sockd &
-      wait $!
-    else
-      snooze 60 &
-      wait $!
-    fi
+    /usr/sbin/sockd &
+    wait $!
   fi
+  snooze 60 &
+  wait $!
 done

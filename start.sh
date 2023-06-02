@@ -8,6 +8,8 @@
 #     --volume "$(realpath "$1"):/etc/wireguard/:ro" \
 #     kizzx2/wireguard-socks-proxy
 
+docker stop wireguard
+docker rm wireguard
 exec sudo docker run -d --privileged --name=wireguard \
     --restart unless-stopped \
     --cap-add=NET_ADMIN \
