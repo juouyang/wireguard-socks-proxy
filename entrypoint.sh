@@ -22,6 +22,9 @@ function snooze {
     sleep $1
 }
 
+echo nameserver 1.1.1.1 > /etc/resolv.conf
+echo nameserver 8.8.8.8 >> /etc/resolv.conf
+
 while true
 do
   if ! ping -c 1 10.1.1.1 >/dev/null 2>&1 && ping -c 1 1.1.1.1 >/dev/null 2>&1; then
