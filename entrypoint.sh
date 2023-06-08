@@ -16,8 +16,6 @@ sigterm_handler() {
 # 設置 SIGTERM 信號處理器
 trap 'sigterm_handler' SIGTERM
 
-set -e
-
 function snooze {
     sleep $1
 }
@@ -27,16 +25,22 @@ echo nameserver 8.8.8.8 >> /etc/resolv.conf
 
 while true
 do
-  if ! ping -c 1 10.1.1.1 >/dev/null 2>&1 && ping -c 1 1.1.1.1 >/dev/null 2>&1; then
-    echo "Ping 10.1.1.1 failed, but ping 1.1.1.1 succeeded!"
-    ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
-    wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
-    sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
-    snooze 3 &
+  curl -s --proxy socks5://127.0.0.1:1080 http://10.1.1.1 -t 1 > /dev/null
+  if [ $? -eq 0 ]; then
+    snooze 300 &
     wait $!
-    /usr/sbin/sockd &
+  else
+    if ! ping -c 1 10.1.1.1 >/dev/null 2>&1 && ping -c 1 1.1.1.1 >/dev/null 2>&1; then
+      echo "Ping 10.1.1.1 failed, but ping 1.1.1.1 succeeded!"
+      ifname=$(basename $(ls -1 /etc/wireguard/*.conf | head -1) .conf)
+      wg-quick up /etc/wireguard/$ifname.conf 2>/dev/null
+      sed -i'' -e "s/__replace_me_ifname__/$ifname/" /etc/sockd.conf
+      snooze 3 &
+      wait $!
+      kill -SIGTERM `pgrep sockd` 2>/dev/null
+      /usr/sbin/sockd &
+    fi
+    snooze 60 &
     wait $!
   fi
-  snooze 60 &
-  wait $!
 done
