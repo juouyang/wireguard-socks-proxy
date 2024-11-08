@@ -44,3 +44,14 @@ hpts -s 127.0.0.1:1080 -p 8080
 ### I get "Permission Denied"
 
 This can happen if your WireGuard configuration file includes an IPv6 address but your host interface does not work with it. Try removing the IPv6 address in `Address` from your configuration file.
+
+
+---
+
+## K8s
+
+```
+kubectl create secret generic wireguard-config \
+    --from-file=config/3_lan_Charlie/3_lan_Charlie.conf \
+    --from-file=config/3_lan_Charlie/3_lan_Charlie
+```

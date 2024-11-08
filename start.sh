@@ -18,4 +18,5 @@ exec docker run -d --privileged --name=wireguard \
     --health-timeout=10s \
     --health-retries=3 \
     --health-interval=30s \
-    --publish 127.0.0.1:31080:1080 juouyang/wireguard-socks-proxy:1.0.2
+    --label autoheal=false \
+    --publish 127.0.0.1:31080:1080 juouyang/wireguard-socks-proxy:1.0.2-arm64

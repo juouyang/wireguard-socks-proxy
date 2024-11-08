@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wireguard-socks-proxy
+spec:
+  selector:
+    app: wireguard-socks-proxy
+  ports:
+  - protocol: TCP
+    port: 1080
+    targetPort: socks
+  type: ClusterIP

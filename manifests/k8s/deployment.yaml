@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard-socks-proxy
+  labels:
+    app: wireguard-socks-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wireguard-socks-proxy
+  template:
+    metadata:
+      labels:
+        app: wireguard-socks-proxy
+    spec:
+      containers:
+      - name: wireguard-socks-proxy
+        image: juouyang/wireguard-socks-proxy:1.0.5-arm64
+        ports:
+        - containerPort: 1080
+          name: socks
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: wireguard-config
+          mountPath: /etc/wireguard
+          readOnly: true
+        livenessProbe:
+          exec:
+            command:
+              - ping
+              - -c
+              - "3"
+              - 10.1.1.1
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      volumes:
+      - name: wireguard-config
+        secret:
+          secretName: wireguard-config
