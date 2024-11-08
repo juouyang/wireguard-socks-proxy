@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: wireguard-socks-proxy
-        image: juouyang/wireguard-socks-proxy:1.0.5-arm64
+        image: juouyang/wireguard-socks-proxy:1.0.6-arm64
+        imagePullPolicy: Always
         ports:
         - containerPort: 1080
           name: socks

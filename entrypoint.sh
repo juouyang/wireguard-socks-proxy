@@ -31,6 +31,7 @@ do
   curl -s --proxy socks5://127.0.0.1:1080 http://${TARGET_ADDRESS} --max-time 1 > /dev/null
   if [ $? -eq 0 ]; then
     # echo "VPN health"
+    curl -s -o /dev/null https://<push-monitoring-url>
     snooze 300 &
     wait $!
   else

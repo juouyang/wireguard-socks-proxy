@@ -1,1 +1,1 @@
-docker build -t juouyang/wireguard-socks-proxy:1.0.5-arm64 .
+docker build -t juouyang/wireguard-socks-proxy:1.0.6-arm64 .
