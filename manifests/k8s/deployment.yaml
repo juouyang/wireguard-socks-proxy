@@ -16,8 +16,11 @@ spec:
     spec:
       containers:
       - name: wireguard-socks-proxy
-        image: juouyang/wireguard-socks-proxy:1.0.6-arm64
+        image: juouyang/wireguard-socks-proxy:1.0.7-arm64
         imagePullPolicy: Always
+        env:
+        - name: UPTIME_PUSH_URL
+          value: "<YOUR_UPTIME_PUSH_URL>"
         ports:
         - containerPort: 1080
           name: socks
