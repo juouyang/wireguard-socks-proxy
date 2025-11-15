@@ -1,1 +1,2 @@
 config/*
+manifests/k8s/*-secret.yaml

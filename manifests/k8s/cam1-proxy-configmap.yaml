@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cam1-proxy
+data:
+  cam1.conf: |
+    server {
+      listen 80 default_server;
+      server_name _;
+      root /usr/share/nginx/html;
+      index index.html;
+
+      # 網頁：/ 會 fallback 到 index.html
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+
+      # HLS 串流：/cam1/stream.m3u8、/cam1/streamXX.ts
+      location /cam1/ {
+        alias /var/local/cam1/;
+        autoindex off;
+      }
+    }
+
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <title>Camera Stream</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    </head>
+    <body>
+    <video id="video" controls autoplay muted style="width: 100%; max-width: 800px;"></video>
+    <script>
+      var video = document.getElementById('video');
+      var videoSrc = '/cam1/stream.m3u8';
+      if (Hls.isSupported()) {
+          var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = videoSrc;
+      }
+    </script>
+    </body>
+    </html>

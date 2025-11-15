@@ -10,3 +10,16 @@ spec:
     port: 1080
     targetPort: socks
   type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cam1
+spec:
+  selector:
+    app: wireguard-socks-proxy
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP

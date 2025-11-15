@@ -20,7 +20,10 @@ spec:
         imagePullPolicy: Always
         env:
         - name: UPTIME_PUSH_URL
-          value: "<YOUR_UPTIME_PUSH_URL>"
+          valueFrom:
+            secretKeyRef:
+              name: uptime-push-url
+              key: UPTIME_PUSH_URL
         ports:
         - containerPort: 1080
           name: socks
@@ -51,7 +54,86 @@ spec:
           limits:
             cpu: "200m"
             memory: "256Mi"
+      - name: cam1-proxy
+        image: nginx:stable
+        ports:
+        - containerPort: 80
+          name: cam1
+        volumeMounts:
+        # 把 cam1.conf 當成唯一的 default.conf，用來取代 image 內建的 default.conf
+        - name: cam1-nginx-conf
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: cam1.conf
+        # 把 index.html 掛到 Nginx 預設 root 位置
+        - name: cam1-nginx-html
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+        - name: cam1-data
+          mountPath: /var/local/cam1
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      - name: cam1-ffmpeg
+        image: linuxserver/ffmpeg:latest
+        env:
+          - name: RTSP_URL
+            valueFrom:
+              secretKeyRef:
+                name: cam1-rtsp
+                key: RTSP_URL
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            mkdir -p /var/local/cam1;
+            ffmpeg -rtsp_transport tcp -i "$RTSP_URL" \
+              -c copy \
+              -f hls \
+              -hls_time 0.5 \
+              -hls_list_size 3 \
+              -hls_flags delete_segments+independent_segments \
+              /var/local/cam1/stream.m3u8
+        volumeMounts:
+        - name: cam1-data
+          mountPath: /var/local/cam1
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - test -f /var/local/cam1/stream.m3u8
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
       volumes:
       - name: wireguard-config
         secret:
           secretName: wireguard-config
+
+      - name: cam1-nginx-conf
+        configMap:
+          name: cam1-proxy
+          items:
+          - key: cam1.conf
+            path: cam1.conf
+
+      - name: cam1-nginx-html
+        configMap:
+          name: cam1-proxy
+          items:
+          - key: index.html
+            path: index.html
+
+      - name: cam1-data
+        emptyDir: {}
