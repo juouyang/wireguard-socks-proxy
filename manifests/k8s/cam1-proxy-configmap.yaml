@@ -20,6 +20,12 @@ data:
         alias /var/local/cam1/;
         autoindex off;
       }
+
+      # 健康檢查
+      location /healthz {
+          return 200 "ok\n";
+          add_header Content-Type text/plain;
+      }
     }
 
   index.html: |
