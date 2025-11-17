@@ -10,6 +10,7 @@ data:
       server_name _;
       root /usr/share/nginx/html;
       index index.html;
+      error_log /var/log/nginx/error.log warn;
 
       # 網頁：/ 會 fallback 到 index.html
       location / {
@@ -40,6 +41,7 @@ data:
 
       # 健康檢查
       location /healthz {
+          access_log off;
           default_type text/plain;
           return 200 "ok\n";
       }
