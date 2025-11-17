@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cam1-proxy
+  name: nginx-reverse-proxy
   namespace: edge-newpark
 data:
-  cam1.conf: |
+  default.conf.template: |
     server {
       listen 80 default_server;
       server_name _;
@@ -20,6 +20,22 @@ data:
       location /cam1/ {
         alias /var/local/cam1/;
         autoindex off;
+      }
+
+      # Switch ON
+      location /switch/on {
+        if ($arg_token != "${SWITCH_TOKEN}") {
+          return 401;
+        }
+        proxy_pass ${SWITCH_ON_URL};
+      }
+
+      # Switch OFF
+      location /switch/off {
+        if ($arg_token != "${SWITCH_TOKEN}") {
+          return 401;
+        }
+        proxy_pass ${SWITCH_OFF_URL};
       }
 
       # 健康檢查

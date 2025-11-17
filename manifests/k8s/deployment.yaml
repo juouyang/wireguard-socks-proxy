@@ -55,18 +55,39 @@ spec:
           limits:
             cpu: "200m"
             memory: "256Mi"
-      - name: cam1-proxy
+      - name: nginx-reverse-proxy
         image: nginx:stable
+        env:
+        - name: SWITCH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: switch-config
+              key: SWITCH_TOKEN
+        - name: SWITCH_ON_URL
+          valueFrom:
+            secretKeyRef:
+              name: switch-config
+              key: SWITCH_ON_URL
+        - name: SWITCH_OFF_URL
+          valueFrom:
+            secretKeyRef:
+              name: switch-config
+              key: SWITCH_OFF_URL
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            envsubst '${SWITCH_TOKEN} ${SWITCH_ON_URL} ${SWITCH_OFF_URL}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
+            exec nginx -g "daemon off;"
         ports:
         - containerPort: 80
           name: cam1
         volumeMounts:
-        # 把 cam1.conf 當成唯一的 default.conf，用來取代 image 內建的 default.conf
-        - name: cam1-nginx-conf
-          mountPath: /etc/nginx/conf.d/default.conf
-          subPath: cam1.conf
+        # 把 default.conf.template 掛到 Nginx 預設 conf.d 位置
+        - name: nginx-default-conf
+          mountPath: /etc/nginx/conf.d/default.conf.template
+          subPath: default.conf.template
         # 把 index.html 掛到 Nginx 預設 root 位置
-        - name: cam1-nginx-html
+        - name: nginx-index-html
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html
         - name: cam1-data
@@ -122,16 +143,16 @@ spec:
         secret:
           secretName: wireguard-config
 
-      - name: cam1-nginx-conf
+      - name: nginx-default-conf
         configMap:
-          name: cam1-proxy
+          name: nginx-reverse-proxy
           items:
-          - key: cam1.conf
-            path: cam1.conf
+          - key: default.conf.template
+            path: default.conf.template
 
-      - name: cam1-nginx-html
+      - name: nginx-index-html
         configMap:
-          name: cam1-proxy
+          name: nginx-reverse-proxy
           items:
           - key: index.html
             path: index.html
