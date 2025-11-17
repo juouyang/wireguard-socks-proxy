@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cam1
+  namespace: edge-newpark
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: cam1.apps.k8s.juouyang.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: cam1
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - cam1.apps.k8s.juouyang.com

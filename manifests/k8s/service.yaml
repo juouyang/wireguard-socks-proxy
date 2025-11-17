@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: wireguard-socks-proxy
+  namespace: edge-newpark
 spec:
   selector:
     app: wireguard-socks-proxy
@@ -15,6 +16,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cam1
+  namespace: edge-newpark
 spec:
   selector:
     app: wireguard-socks-proxy
