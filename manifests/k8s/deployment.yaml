@@ -111,7 +111,7 @@ spec:
         args:
           - |
             mkdir -p /var/local/cam1;
-            ffmpeg -rtsp_transport tcp -i "$RTSP_URL" \
+            ffmpeg -loglevel error -hide_banner -rtsp_transport tcp -i "$RTSP_URL" \
               -c copy \
               -f hls \
               -hls_time 0.5 \

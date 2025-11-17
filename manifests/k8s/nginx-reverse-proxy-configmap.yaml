@@ -40,8 +40,8 @@ data:
 
       # 健康檢查
       location /healthz {
+          default_type text/plain;
           return 200 "ok\n";
-          add_header Content-Type text/plain;
       }
     }
 
