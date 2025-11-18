@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cam1
+  name: nginx-reverse-proxy
   namespace: edge-newpark
 spec:
   selector:

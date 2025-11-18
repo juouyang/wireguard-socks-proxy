@@ -3,6 +3,12 @@ kind: Ingress
 metadata:
   name: cam1
   namespace: edge-newpark
+  annotations:
+    nginx.org/server-snippets: |
+      # Block switch endpoints on cam1 host; they are exposed via a dedicated ingress
+      if ($request_uri ~ "^/switch/(on|off)") {
+        return 404;
+      }
 spec:
   ingressClassName: nginx
   rules:
@@ -11,7 +17,7 @@ spec:
       paths:
       - backend:
           service:
-            name: cam1
+            name: nginx-reverse-proxy
             port:
               number: 80
         path: /
@@ -19,3 +25,33 @@ spec:
   tls:
   - hosts:
     - cam1.apps.k8s.juouyang.com
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: switch
+  namespace: edge-newpark
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: switch.apps.k8s.juouyang.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx-reverse-proxy
+            port:
+              number: 80
+        path: /switch/on
+        pathType: Prefix
+      - backend:
+          service:
+            name: nginx-reverse-proxy
+            port:
+              number: 80
+        path: /switch/off
+        pathType: Prefix
+  tls:
+  - hosts:
+    - switch.apps.k8s.juouyang.com
