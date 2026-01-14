@@ -6,6 +6,8 @@ metadata:
   labels:
     app: wireguard-socks-proxy
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -37,16 +39,13 @@ spec:
         - name: wireguard-config
           mountPath: /etc/wireguard
           readOnly: true
-        livenessProbe:
+        readinessProbe:
           exec:
             command:
-              - ping
-              - -c
-              - "3"
-              - 10.1.1.1
-          initialDelaySeconds: 30
-          timeoutSeconds: 10
-          periodSeconds: 30
+            - /bin/sh
+            - -c
+            - wg show | grep -q handshake
+          periodSeconds: 10
           failureThreshold: 3
         resources:
           requests:
@@ -128,13 +127,29 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
+        startupProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              [ -f /var/local/cam1/stream.m3u8 ]
+          periodSeconds: 10
+          failureThreshold: 30   # 給 5 分鐘啟動 RTSP
         livenessProbe:
           exec:
             command:
-              - /bin/sh
-              - -c
-              - test -f /var/local/cam1/stream.m3u8
-          initialDelaySeconds: 10
+            - /bin/sh
+            - -c
+            - |
+              FILE=/var/local/cam1/stream.m3u8
+              [ ! -f "$FILE" ] && exit 1
+
+              NOW=$(date +%s)
+              MTIME=$(stat -c %Y "$FILE")
+
+              # 60 秒沒更新才算真的死
+              [ $((NOW - MTIME)) -le 60 ]
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 3

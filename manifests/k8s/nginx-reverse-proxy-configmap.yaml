@@ -21,6 +21,11 @@ data:
       location /cam1/ {
         alias /var/local/cam1/;
         autoindex off;
+        
+        # 🔥 強制瀏覽器不要快取
+        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
       }
 
       # Switch ON
