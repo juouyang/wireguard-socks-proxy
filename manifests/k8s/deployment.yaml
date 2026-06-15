@@ -49,7 +49,7 @@ spec:
           failureThreshold: 3
         resources:
           requests:
-            cpu: "100m"
+            cpu: "25m"
             memory: "128Mi"
           limits:
             cpu: "200m"
@@ -93,7 +93,7 @@ spec:
           mountPath: /var/local/cam1
         resources:
           requests:
-            cpu: "100m"
+            cpu: "25m"
             memory: "128Mi"
           limits:
             cpu: "200m"
@@ -122,7 +122,7 @@ spec:
           mountPath: /var/local/cam1
         resources:
           requests:
-            cpu: "200m"
+            cpu: "50m"
             memory: "256Mi"
           limits:
             cpu: "500m"
